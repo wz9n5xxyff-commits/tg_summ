@@ -19,7 +19,7 @@ def publish_to_telegram(text, is_test=True):
     payload = {
         "chat_id": channel_id,
         "text": text,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True
     }
     
@@ -37,5 +37,5 @@ def publish_to_telegram(text, is_test=True):
 
 if __name__ == "__main__":
     # Small test message
-    test_msg = "*Привет!* Это тестовое сообщение от ИИ-бота."
+    test_msg = "<b>Привет!</b> Это тестовое сообщение от ИИ-бота."
     publish_to_telegram(test_msg)

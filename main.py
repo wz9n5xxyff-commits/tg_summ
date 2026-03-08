@@ -28,13 +28,17 @@ def main():
     print("-" * 40)
     
     # 3. Publish
-    print("Publishing to Telegram...")
-    # NOTE: In GitHub Actions, we will pass an environment variable to determine if it's a test run
-    # For now, we will publish to the test channel (or main channel if IS_TEST=false)
-    # Be very careful.
+    import os
+    is_test_run = os.environ.get("IS_TEST", "false").lower() == "true"
+    print(f"Publishing to Telegram... (Test mode: {is_test_run})")
     
-    # We will log it instead of publishing for this local run just to be safe.
-    print("Skipping actual publish for safety during local testing.")
+    success = publish_to_telegram(digest_text, is_test=is_test_run)
+    if success:
+        print("Published successfully!")
+    else:
+        print("Failed to publish.")
+        sys.exit(1)
+        
     print("Done!")
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import sys
 from scraper import TelegramScraper
 from ai_writer import generate_digest
 from publisher import publish_to_telegram
+from voice_export import export_for_alice
 
 def main():
     print("Starting TG Auto Digest...")
@@ -26,7 +27,14 @@ def main():
     print("-" * 40)
     print(digest_text)
     print("-" * 40)
-    
+
+    # 2.5 Save a voice-friendly copy for the Alice skill (non-fatal)
+    try:
+        alice_data = export_for_alice(digest_text, posts)
+        print(f"Alice digest saved: {len(alice_data['sections'])} sections.")
+    except Exception as e:
+        print(f"Warning: failed to export digest for Alice: {e}")
+
     # 3. Publish
     import os
     is_test_run = os.environ.get("IS_TEST", "false").lower() == "true"

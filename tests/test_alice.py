@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from datetime import datetime
@@ -82,15 +83,39 @@ def test_latest_post_and_exit():
     assert resp["response"]["end_session"]
 
 
-def test_paging():
+def test_paging_keeps_state_small():
     pages = skill.chunk(["слово " * 100] * 5)
     assert len(pages) > 1 and all(len(p) <= skill.MAX_CHARS for p in pages)
 
-    state = {"pages": ["Вторая страница.", "Третья страница."], "last": "Первая."}
-    resp = skill.handler(make_event("дальше", state=state))
-    assert resp["response"]["text"].startswith("Вторая страница.")
-    assert resp["session_state"]["pages"] == ["Третья страница."]
-    assert len(resp["response"]["text"]) <= 1024
+    # Long digest: 4 rubrics x 6 items with long summaries -> several pages
+    long_digest = "\n".join(
+        f"{emoji} <b>Рубрика {n}</b>\n" + "\n".join(
+            f"• <b>Пункт {n}.{i}</b> — " + "очень длинное описание поста " * 6 + "."
+            for i in range(6)
+        )
+        for n, emoji in enumerate(["💼", "🛠", "🧠", "☕"])
+    )
+    saved = skill._cache["data"]
+    skill._cache["data"] = build_alice_data(long_digest, POSTS)
+    try:
+        resp = skill.handler(make_event("что нового"))
+        seen = [resp["response"]["text"]]
+        while "Сказать дальше?" in resp["response"]["text"]:
+            state = resp["session_state"]
+            assert len(json.dumps(state, ensure_ascii=False).encode()) < 1024
+            resp = skill.handler(make_event("дальше", state=state))
+            seen.append(resp["response"]["text"])
+            assert len(resp["response"]["text"]) <= 1024
+        assert len(seen) > 2
+        assert "Пункт 3.5" in seen[-1]
+
+        repeat = skill.handler(make_event("повтори", state={"mode": "full", "page": 1}))
+        assert repeat["response"]["text"] == seen[1]
+
+        done = skill.handler(make_event("дальше", state={"mode": "full", "page": len(seen) - 1}))
+        assert "Это всё" in done["response"]["text"]
+    finally:
+        skill._cache["data"] = saved
 
 
 def test_no_data():

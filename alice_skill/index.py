@@ -150,30 +150,49 @@ def available_buttons(data, exclude=None):
     return titles
 
 
-def reply(text, state=None, buttons=None, end=False, tts=None):
-    has_more = bool(state and state.get("pages"))
+def reply(text, state=None, buttons=None, end=False, has_more=False):
     if has_more:
         text += " Сказать дальше?"
         buttons = ["Дальше"] + [b for b in (buttons or []) if b != "Дальше"]
     response = {
         "text": text[:1024],
-        "tts": to_tts(tts or text)[:1024],
+        "tts": to_tts(text)[:1024],
         "end_session": end,
     }
     if buttons:
-        response["buttons"] = [{"title": b, "hide": True} for b in buttons[:6]]
+        response["buttons"] = [{"title": b[:64], "hide": True} for b in buttons[:6]]
     return {
         "version": "1.0",
         "response": response,
+        # Alice caps session_state at 1 KB, so only a small pointer is stored
+        # here and the page text is rebuilt from the digest on every request.
         "session_state": state or {},
     }
 
 
-def paged(pages, data, exclude=None):
-    """Says the first page and stores the rest in the session state."""
-    first, rest = pages[0], pages[1:]
-    state = {"pages": rest, "last": first}
-    return reply(first, state=state, buttons=available_buttons(data, exclude))
+def pages_for(data, mode):
+    if mode == "full":
+        return full_digest_pages(data)
+    if mode == "latest":
+        return latest_post_pages(data)
+    return section_pages(data, mode)
+
+
+def paged(data, mode, page=0):
+    """Says page `page` of `mode` and remembers the position in the session."""
+    pages = pages_for(data, mode) or []
+    if page >= len(pages):
+        return reply(
+            "Это всё. Хотите послушать другую рубрику или последний пост?",
+            buttons=available_buttons(data),
+        )
+    exclude = mode if mode in RUBRIC_BUTTONS else None
+    return reply(
+        pages[page],
+        state={"mode": mode, "page": page},
+        buttons=available_buttons(data, exclude),
+        has_more=page + 1 < len(pages),
+    )
 
 
 def handle(event):
@@ -204,24 +223,23 @@ def handle(event):
     if any(w in command for w in ("помощ", "умеешь", "что ты можешь")):
         return reply(HELP_TEXT, buttons=available_buttons(data))
 
-    if any(w in command for w in ("повтор", "еще раз")) and state.get("last"):
-        return reply(state["last"], state=state, buttons=available_buttons(data))
+    mode, page = state.get("mode"), int(state.get("page", 0) or 0)
 
-    if tokens & {"дальше", "далее", "продолжи", "продолжай", "да", "давай", "еще"} and state.get("pages"):
-        pages = state["pages"]
-        return paged(pages, data)
+    if any(w in command for w in ("повтор", "еще раз")) and mode:
+        return paged(data, mode, page)
+
+    if tokens & {"дальше", "далее", "продолжи", "продолжай", "да", "давай", "еще"} and mode:
+        return paged(data, mode, page + 1)
 
     if "последн" in command or "свеж" in command:
-        pages = latest_post_pages(data)
-        if pages:
-            return paged(pages, data)
+        if latest_post_pages(data):
+            return paged(data, "latest")
         return reply("Последний пост пока не загружен.", buttons=available_buttons(data))
 
     rubric = detect_rubric(tokens, command)
     if rubric:
-        pages = section_pages(data, rubric)
-        if pages:
-            return paged(pages, data, exclude=rubric)
+        if section_pages(data, rubric):
+            return paged(data, rubric)
         return reply(
             f"На этой неделе в рубрике «{RUBRIC_BUTTONS[rubric]}» ничего не было. Выбрать другую?",
             buttons=available_buttons(data, exclude=rubric),
@@ -229,7 +247,7 @@ def handle(event):
 
     if any(w in command for w in ("нов", "дайджест", "недел", "все", "расскажи", "перескажи")) or \
             tokens & {"да", "давай"}:
-        return paged(full_digest_pages(data), data)
+        return paged(data, "full")
 
     return reply(
         "Не совсем поняла. Скажите «что нового», назовите рубрику или попросите последний пост.",

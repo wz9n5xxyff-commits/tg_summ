@@ -1,6 +1,6 @@
 """Alice (Yandex Dialogs) skill: reads the weekly "Ясно Понятно" digest aloud.
 
-Deploy as a Yandex Cloud Function (Python 3.10+, entry point `index.handler`).
+Deploy as a Yandex Cloud Function (Python 3.12, entry point `index.handler`).
 Standard library only — no requirements.txt needed.
 
 Environment variables:
@@ -200,7 +200,8 @@ def handle(event):
     session = event.get("session", {})
     state = event.get("state", {}).get("session", {}) or {}
     command = (request.get("command") or "").lower().replace("ё", "е")
-    tokens = set(request.get("nlu", {}).get("tokens", []) or re.findall(r"\w+", command))
+    raw_tokens = request.get("nlu", {}).get("tokens", []) or re.findall(r"\w+", command)
+    tokens = {t.lower().replace("ё", "е") for t in raw_tokens}
 
     data = load_digest()
 

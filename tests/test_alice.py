@@ -109,6 +109,9 @@ def test_paging_keeps_state_small():
         assert len(seen) > 2
         assert "Пункт 3.5" in seen[-1]
 
+        via_yo = skill.handler(make_event("ещё", state={"mode": "full", "page": 0}))
+        assert via_yo["response"]["text"] == seen[1]
+
         repeat = skill.handler(make_event("повтори", state={"mode": "full", "page": 1}))
         assert repeat["response"]["text"] == seen[1]
 

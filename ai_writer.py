@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,10 +9,11 @@ api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise ValueError("GEMINI_API_KEY not found in .env file.")
 
-genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
-# Using gemini-2.5-flash as it's the fastest and free tier model
-model = genai.GenerativeModel('gemini-2.5-flash')
+# gemini-2.5-flash: fast and available on the free tier.
+# Override with the GEMINI_MODEL env var if Google retires it.
+MODEL_NAME = os.getenv("GEMINI_MODEL") or "gemini-2.5-flash"
 
 SYSTEM_PROMPT = """
 Ты — автор Telegram-канала "Ясно Понятно Волкова" (@yasnovolkova). 
@@ -78,7 +79,7 @@ def generate_digest(posts):
     prompt = f"{SYSTEM_PROMPT}\n\nВОТ ПОСТЫ ЗА НЕДЕЛЮ:\n{posts_text}\n\nНАПИШИ ДАЙДЖЕСТ:"
     
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
         return response.text
     except Exception as e:
         print(f"Error calling Gemini API: {e}")

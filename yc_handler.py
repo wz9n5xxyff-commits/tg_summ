@@ -7,6 +7,10 @@ Entry point: `yc_handler.handler`.
 * Alice request -> answer with the skill in alice_skill/index.py, which reads
   that same JSON.
 
+Note: from Yandex Cloud regions Telegram and Gemini are unreachable, so in
+production the weekly job runs elsewhere (`main.py` with DIGEST_BUCKET and
+YC_SA_KEY uploads digest.json itself) and this function only answers Alice.
+
 Environment variables: GEMINI_API_KEY, TG_BOT_TOKEN, TG_CHANNEL_ID,
 TG_TEST_CHANNEL_ID, DIGEST_BUCKET, optional IS_TEST / DIGEST_DAYS / GEMINI_MODEL.
 The function's service account needs storage.editor and functions.functionInvoker.

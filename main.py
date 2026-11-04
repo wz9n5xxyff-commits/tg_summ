@@ -55,10 +55,19 @@ def main():
     days = int(os.environ.get("DIGEST_DAYS") or 7)
     is_test = os.environ.get("IS_TEST", "false").lower() == "true"
     try:
-        run_digest(days=days, is_test=is_test)
+        alice_data = run_digest(days=days, is_test=is_test)
     except RuntimeError as e:
         print(e)
         sys.exit(1)
+
+    # Optional: copy the voice version to Object Storage for the Alice skill
+    if alice_data and os.environ.get("DIGEST_BUCKET") and os.environ.get("YC_SA_KEY"):
+        from yc_storage import upload_digest
+        try:
+            upload_digest(alice_data)
+        except Exception as e:
+            print(f"Failed to upload digest to Object Storage: {e}")
+            sys.exit(1)
     print("Done!")
 
 

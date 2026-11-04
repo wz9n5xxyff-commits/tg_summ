@@ -1,9 +1,8 @@
 name: Telegram Auto Digest
 
 on:
-  schedule:
-    # Run every Sunday at 18:00 UTC (21:00 MSK)
-    - cron: '0 18 * * 0'
+  # No schedule: the weekly run is a Claude Code scheduled task (see ALICE.md),
+  # so a revived GitHub Actions won't publish the digest twice.
   workflow_dispatch: # Allows manual triggering from GitHub UI
     inputs:
       is_test:
@@ -39,8 +38,7 @@ jobs:
         TG_CHANNEL_ID: ${{ secrets.TG_CHANNEL_ID }}
         TG_TEST_CHANNEL_ID: ${{ secrets.TG_TEST_CHANNEL_ID }}
         GEMINI_MODEL: ${{ vars.GEMINI_MODEL }} # optional repo variable to switch the model
-        # Scheduled runs publish to the main channel; manual runs follow the checkbox
-        IS_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.is_test && 'true' || 'false' }}
+        IS_TEST: ${{ inputs.is_test && 'true' || 'false' }}
       run: python main.py
 
     - name: Save digest for Alice skill

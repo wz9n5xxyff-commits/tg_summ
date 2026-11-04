@@ -4,8 +4,10 @@ Deploy as a Yandex Cloud Function (Python 3.12, entry point `index.handler`).
 Standard library only — no requirements.txt needed.
 
 Environment variables:
-  DIGEST_URL    URL of alice/digest.json, e.g.
+  DIGEST_URL    URL of the digest JSON: either
                 https://raw.githubusercontent.com/<owner>/tg_summ/main/alice/digest.json
+                or https://storage.yandexcloud.net/<bucket>/digest.json (private
+                bucket, read with the function's service account token)
   GITHUB_TOKEN  (optional) token with read access, if the repository is private
 """
 import json
@@ -42,7 +44,7 @@ HELP_TEXT = (
 
 # ---------- data ----------
 
-def load_digest():
+def load_digest(cloud_token=None):
     now = time.time()
     if _cache["data"] is not None and now - _cache["ts"] < CACHE_TTL:
         return _cache["data"]
@@ -53,6 +55,9 @@ def load_digest():
     token = os.environ.get("GITHUB_TOKEN")
     if token:
         headers["Authorization"] = f"token {token}"
+    if cloud_token and "storage.yandexcloud.net" in url:
+        # Private Object Storage bucket, read with the function's service account
+        headers["X-YaCloud-SubjectToken"] = cloud_token
     try:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=2) as resp:
@@ -195,7 +200,7 @@ def paged(data, mode, page=0):
     )
 
 
-def handle(event):
+def handle(event, cloud_token=None):
     request = event.get("request", {})
     session = event.get("session", {})
     state = event.get("state", {}).get("session", {}) or {}
@@ -203,7 +208,7 @@ def handle(event):
     raw_tokens = request.get("nlu", {}).get("tokens", []) or re.findall(r"\w+", command)
     tokens = {t.lower().replace("ё", "е") for t in raw_tokens}
 
-    data = load_digest()
+    data = load_digest(cloud_token)
 
     if any(w in tokens for w in ("хватит", "выход", "выйти", "стоп", "пока")):
         return reply("Хорошо, до встречи! Новый дайджест выходит по воскресеньям.", end=True)
@@ -256,10 +261,18 @@ def handle(event):
     )
 
 
+def context_token(context):
+    """IAM token of the function's service account (Yandex Cloud Functions)."""
+    token = getattr(context, "token", None)
+    if isinstance(token, dict):
+        return token.get("access_token")
+    return None
+
+
 def handler(event, context=None):
     """Entry point for Yandex Cloud Functions."""
     try:
-        return handle(event)
+        return handle(event, cloud_token=context_token(context))
     except Exception as e:
         print(f"Skill error: {e}")
         return reply("Ой, что-то сломалось. Попробуйте ещё раз чуть позже.")

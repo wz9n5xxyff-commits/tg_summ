@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Свой навык для Алисы</title>
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --ink: #1d1b26; --muted: #5d5a6b; --line: #e6e3ef;
+    --accent: #6a4cf5; --accent-soft: #efebff; --warm: #fff6e8; --warm-ink: #8a5a00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Inter", "DejaVu Sans", sans-serif; color: var(--ink); background: #fff; font-size: 11.5pt; line-height: 1.5; }
+  .page { width: 210mm; height: 297mm; padding: 18mm 18mm 16mm; position: relative; page-break-after: always; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  .footer { position: absolute; left: 18mm; right: 18mm; bottom: 9mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
+  h1 { font-family: "Inter Display", "Inter", sans-serif; font-size: 34pt; line-height: 1.08; margin: 0 0 6mm; letter-spacing: -0.5px; }
+  h2 { font-family: "Inter Display", "Inter", sans-serif; font-size: 19pt; margin: 0 0 4mm; display: flex; align-items: center; gap: 4mm; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  p { margin: 0 0 3mm; }
+  .lead { font-size: 13.5pt; color: var(--muted); max-width: 150mm; }
+  .num { flex: none; width: 11mm; height: 11mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14pt; display: inline-flex; align-items: center; justify-content: center; }
+  .step { margin-bottom: 9mm; }
+  .path { display: flex; flex-wrap: wrap; align-items: center; gap: 2mm; background: #f7f6fb; border: 1px solid var(--line); border-radius: 3mm; padding: 3mm 4mm; margin: 2mm 0 3mm; font-size: 10.5pt; }
+  .path .arr { color: var(--muted); }
+  .site { font-weight: 600; color: var(--accent); }
+  .btn { display: inline-block; background: var(--accent); color: #fff; border-radius: 1.6mm; padding: 0.6mm 2.6mm; font-weight: 600; font-size: 10pt; white-space: nowrap; }
+  .btn.ghost { background: #fff; color: var(--accent); border: 1.2px solid var(--accent); }
+  .field { display: inline-block; background: #fff; border: 1px solid #c9c4dc; border-radius: 1.4mm; padding: 0.3mm 2.2mm; font-size: 10pt; white-space: nowrap; }
+  ol.do { margin: 0 0 2mm; padding-left: 6mm; }
+  ol.do li { margin: 0 0 2mm; }
+  .note { background: var(--warm); color: var(--warm-ink); border-radius: 3mm; padding: 3mm 4mm; font-size: 10pt; margin: 3mm 0; }
+  .tip { background: var(--accent-soft); border-radius: 3mm; padding: 3mm 4mm; font-size: 10.5pt; margin: 3mm 0; }
+  .need { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin: 6mm 0 8mm; }
+  .need div { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; font-size: 10.5pt; }
+  .need b { display: block; font-size: 11.5pt; margin-bottom: 1mm; }
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 8mm 0 4mm; }
+  .flow .box { flex: 1; border: 1.5px solid var(--accent); border-radius: 3mm; padding: 4mm 3mm; text-align: center; font-size: 10pt; background: #fff; }
+  .flow .box b { display: block; font-size: 11pt; margin-bottom: 1mm; }
+  .flow .box .ic { font-size: 18pt; display: block; margin-bottom: 1mm; }
+  .flow .arrow { flex: none; width: 7mm; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 15pt; }
+  pre { background: #1d1b26; color: #f2f0fa; border-radius: 3mm; padding: 4mm 5mm; font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; line-height: 1.35; margin: 2mm 0 2mm; white-space: pre; }
+  .prompt { border: 1.5px dashed var(--accent); border-radius: 3mm; padding: 4mm 5mm; font-size: 10.5pt; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; margin: 2mm 0 3mm; }
+  td, th { border-bottom: 1px solid var(--line); padding: 2mm 2mm; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 9.5pt; }
+  .say { font-weight: 600; }
+  .cover-tag { display: inline-block; background: var(--accent-soft); color: var(--accent); font-weight: 600; border-radius: 10mm; padding: 1.5mm 4mm; font-size: 10pt; margin-bottom: 8mm; }
+  .final { margin-top: 10mm; text-align: center; font-size: 17pt; font-family: "Inter Display", "Inter", sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- 1. Cover -->
+<section class="page">
+  <span class="cover-tag">Пошаговая инструкция · без опыта в программировании</span>
+  <h1>Свой навык<br>для Алисы</h1>
+  <p class="lead">Как научить колонку отвечать на ваши вопросы: расписание ребёнка, рецепты, шпаргалки для работы. Навык будет приватным, только для вашей колонки.</p>
+
+  <div class="flow">
+    <div class="box"><span class="ic">💡</span><b>Вы</b>придумываете вопросы и ответы</div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="ic">🧩</span><b>Код</b>один файл, его напишет ИИ или возьмите пример</div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="ic">☁️</span><b>Яндекс Облако</b>здесь «живёт» навык</div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="ic">🔗</span><b>Яндекс Диалоги</b>подключают его к Алисе</div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="ic">🔊</span><b>Колонка</b>отвечает</div>
+  </div>
+  <p style="color:var(--muted); font-size:10pt">Навык делается не голосом с колонки, а на компьютере, на двух сайтах Яндекса.</p>
+
+  <h3>Что понадобится</h3>
+  <div class="need">
+    <div><b>Аккаунт Яндекса</b>тот же, к которому подключена колонка</div>
+    <div><b>Банковская карта</b>для Яндекс Облака. Небольшой навык обычно укладывается в бесплатный лимит</div>
+    <div><b>30–60 минут</b>и компьютер. С телефона неудобно</div>
+  </div>
+
+  <div class="note">Яндекс иногда меняет интерфейс, поэтому названия кнопок могут немного отличаться. Ищите похожие по смыслу.</div>
+
+  <div class="footer"><span>Ясно Понятно · t.me/yasnovolkova</span><span>1</span></div>
+</section>
+
+<!-- 2. Idea + code -->
+<section class="page" style="padding-top:13mm">
+  <style>.p2 .step{margin-bottom:5mm} .p2 td{padding:1.4mm 2mm} .p2 .prompt{padding:3mm 4mm}</style><div class="p2">
+  <div class="step">
+    <h2><span class="num">1</span>Придумайте, что будет отвечать навык</h2>
+    <p>Выпишите вопросы, которые будут задавать колонке, и что она должна ответить. Например, для расписания ребёнка:</p>
+    <table>
+      <tr><th>Спрашивают</th><th>Алиса отвечает</th></tr>
+      <tr><td>«Что во вторник?»</td><td>Во вторник с 16:30 до 17:30 танцы.</td></tr>
+      <tr><td>«Когда танцы?»</td><td>Танцы во вторник и четверг в 16:30.</td></tr>
+      <tr><td>«Что сегодня?»</td><td>Ответ зависит от дня недели. Такое умеет код, который напишет ИИ.</td></tr>
+    </table>
+    <p>Придумайте и название навыка. С него навык будет запускаться: «Алиса, запусти навык <b>Расписание дочки</b>».</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">2</span>Получите код навыка</h2>
+    <p><b>Вариант А: попросите ИИ.</b> Скопируйте в Claude (или другой ИИ) такой запрос и допишите свои вопросы и ответы:</p>
+    <div class="prompt">
+      Напиши навык для Алисы на Python для Yandex Cloud Functions. Один файл <b>index.py</b>, точка входа <b>index.handler</b>, без сторонних библиотек. Навык отвечает на такие вопросы: <i>[ваша таблица из шага 1]</i>. На «что сегодня» и «что завтра» отвечай по текущему дню недели по московскому времени. Объясни простыми словами, куда вставить код.
+    </div>
+    <p style="margin-top:3mm"><b>Вариант Б: возьмите готовый пример</b> и поменяйте ответы на свои (текст в кавычках):</p>
+<pre>ANSWERS = {
+    "понедельник": "В понедельник с 17:00 до 19:00 логоритмика.",
+    "вторник": "Во вторник с 16:30 до 17:30 танцы.",
+    "танц": "Танцы во вторник и четверг в 16:30.",
+}
+
+def handler(event, context):
+    text = event["request"]["command"].lower()
+    if not text:
+        reply = "Привет! Спросите про день недели или занятие."
+    else:
+        reply = "Не поняла. Спросите, например: что во вторник?"
+        for word, answer in ANSWERS.items():
+            if word in text:
+                reply = answer
+                break
+    return {
+        "version": event["version"],
+        "response": {"text": reply, "end_session": False},
+    }</pre>
+    <div class="tip">Слева в кавычках слово, которое ищем во фразе, справа ответ. «танц» без окончания ловит и «танцы», и «танцах». Сохраняйте пробелы в начале строк.</div>
+  </div></div>
+  <div class="footer"><span>Ясно Понятно · t.me/yasnovolkova</span><span>2</span></div>
+</section>
+
+<!-- 3. Yandex Cloud -->
+<section class="page">
+  <div class="step">
+    <h2><span class="num">3</span>Создайте функцию в Яндекс Облаке</h2>
+    <div class="path"><span class="site">console.yandex.cloud</span><span class="arr">→</span>войти аккаунтом Яндекса</div>
+    <ol class="do">
+      <li>Если заходите впервые, Облако предложит создать <b>платёжный аккаунт</b>. Привяжите карту. Это нужно, чтобы облако заработало; деньги за маленький навык обычно не списываются.</li>
+      <li>В меню слева (или через поиск сервисов) откройте <b>Cloud Functions</b>.</li>
+      <li>Нажмите <span class="btn">Создать функцию</span>.</li>
+      <li>Имя: латиницей, маленькими буквами, без пробелов, например <span class="field">raspisanie</span>. Нажмите <span class="btn">Создать</span>.</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">4</span>Вставьте код</h2>
+    <div class="path">Cloud Functions<span class="arr">→</span>ваша функция<span class="arr">→</span><b>Редактор</b></div>
+    <ol class="do">
+      <li>Среда выполнения: <span class="field">Python 3.12</span>. Нажмите <span class="btn">Продолжить</span>.</li>
+      <li>Способ: <span class="field">Редактор кода</span>. Нажмите <span class="btn ghost">Создать файл</span> и назовите его <span class="field">index.py</span>.</li>
+      <li>Вставьте в файл код из шага 2.</li>
+      <li>Ниже заполните параметры:
+        <table>
+          <tr><td>Точка входа</td><td><span class="field">index.handler</span></td></tr>
+          <tr><td>Таймаут</td><td><span class="field">3</span> секунды</td></tr>
+          <tr><td>Память</td><td><span class="field">128 МБ</span></td></tr>
+        </table>
+      </li>
+      <li>Нажмите <span class="btn">Сохранить изменения</span> и подождите, пока появится версия функции.</li>
+    </ol>
+    <div class="tip">Делать функцию публичной не нужно: Яндекс Диалоги вызовут её сами, когда вы подключите навык.</div>
+  </div>
+  <div class="footer"><span>Ясно Понятно · t.me/yasnovolkova</span><span>3</span></div>
+</section>
+
+<!-- 4. Dialogs -->
+<section class="page">
+  <div class="step">
+    <h2><span class="num">5</span>Подключите навык к Алисе</h2>
+    <div class="path"><span class="site">dialogs.yandex.ru/developer</span><span class="arr">→</span>тем же аккаунтом Яндекса</div>
+    <ol class="do">
+      <li>Нажмите <span class="btn">Создать диалог</span> и выберите <b>Навык в Алисе</b>.</li>
+      <li><b>Название навыка</b>: то, что придумали в шаге 1, например <span class="field">Расписание дочки</span>.</li>
+      <li><b>Backend</b>: выберите <span class="field">Функция в Яндекс Облаке</span> и в списке свою функцию (<span class="field">raspisanie</span>).</li>
+      <li><b>Доступ</b>: <span class="field">Приватный</span>. Навык будет только у вас, проверка быстрая и автоматическая.</li>
+      <li>Заполните карточку: короткое описание, 2–3 примера запросов («что сегодня», «когда танцы»), квадратная картинка-иконка, ваша почта, категория. На работу навыка это не влияет.</li>
+      <li>Нажмите <span class="btn">Сохранить</span>.</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">6</span>Проверьте и опубликуйте</h2>
+    <ol class="do">
+      <li>Откройте вкладку <b>Тестирование</b> и напишите в окне вопрос, например «что во вторник». Должен прийти ваш ответ.</li>
+      <li>Если всё правильно, нажмите <span class="btn">Отправить на модерацию</span>.</li>
+      <li>Ждите, пока статус сменится на <b>«Опубликован»</b>. Обычно это от нескольких минут до суток.</li>
+    </ol>
+    <div class="note">Окно в «Тестировании» — это разговор с самим навыком. Если написать туда «опубликовать», навык ответит «не поняла». Публикуется навык кнопкой, а не фразой.</div>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">7</span>Говорите с колонкой</h2>
+    <table>
+      <tr><td class="say">«Алиса, запусти навык Расписание дочки»</td><td>навык поздоровается и будет ждать вопросов</td></tr>
+      <tr><td class="say">«Алиса, спроси у навыка Расписание дочки, что во вторник»</td><td>ответит сразу, одной фразой</td></tr>
+      <tr><td class="say">«Хватит»</td><td>выйти из навыка</td></tr>
+    </table>
+  </div>
+  <div class="footer"><span>Ясно Понятно · t.me/yasnovolkova</span><span>4</span></div>
+</section>
+
+<!-- 5. Troubleshooting -->
+<section class="page">
+  <h2>Если что-то не получилось</h2>
+  <table>
+    <tr><th style="width:38%">Что происходит</th><th>Что сделать</th></tr>
+    <tr><td>Навык отвечает «Не поняла» на всё</td><td>Проверьте, что слово из вопроса есть в коде. Пишите его без окончания: «танц», а не «танцы».</td></tr>
+    <tr><td>В «Тестировании» ошибка или тишина</td><td>Проверьте в Облаке точку входа: <span class="field">index.handler</span>, а файл называется <span class="field">index.py</span>. После правок нажмите <span class="btn">Сохранить изменения</span>.</td></tr>
+    <tr><td>В Диалогах нет вашей функции в списке</td><td>Скорее всего, вы вошли другим аккаунтом Яндекса. И Облако, и Диалоги должны быть под одним аккаунтом.</td></tr>
+    <tr><td>Хочу поменять ответы</td><td>Поправьте текст в коде в Облаке и сохраните. Навык заново публиковать не нужно.</td></tr>
+    <tr><td>Модерация отклонила навык</td><td>Яндекс пишет причину. Обычно это незаполненное поле карточки или неподходящая иконка.</td></tr>
+    <tr><td>Колонка не находит навык</td><td>Проверьте, что статус «Опубликован» и колонка привязана к тому же аккаунту. Название произносите точно так, как написали.</td></tr>
+  </table>
+
+  <h3 style="margin-top:10mm">Идеи для своих навыков</h3>
+  <table>
+    <tr><td>👧 Расписание кружков и секций ребёнка</td><td>🍰 Рецепты, когда руки в муке</td></tr>
+    <tr><td>🧹 Кто сегодня дежурит по дому</td><td>📋 Шпаргалка для новых сотрудников</td></tr>
+    <tr><td>🎒 Что взять с собой на занятия</td><td>🌱 Когда поливать какие цветы</td></tr>
+  </table>
+
+  <p class="final">Ну или попросите Claude — он поможет 🙂</p>
+  <div class="footer"><span>Ясно Понятно · t.me/yasnovolkova</span><span>5</span></div>
+</section>
+
+</body>
+</html>
